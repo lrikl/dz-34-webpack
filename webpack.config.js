@@ -9,76 +9,76 @@ module.exports = {
     mode: "development", // Режим роботи: 'development' для розробки, 'production' для фінальної збірки
     entry: "./src/js/index.js", // Вхідний файл JS, з якого починається збірка
     output: {
-    filename: "bundle.js", // Ім’я файлу результату збірки
-    path: path.resolve(__dirname, "docs"), // Шлях до директорії, в яку буде збережено файл
-    clean: true, // Очищення папки docs перед кожною збіркою
+        filename: "bundle[fullhash].js", // Ім’я файлу результату збірки + хешування для унікальності файлу (для оновлення кешу)
+        path: path.resolve(__dirname, "docs"), // Шлях до директорії, в яку буде збережено файл
+        clean: true, // Очищення папки docs перед кожною збіркою
     },
     devServer: {
-    static: "./docs", // Вказуємо директорію для запуску сервера (docs — це місце, куди Webpack збирає файли)
-    port: 5555, // Порт, на якому буде працювати сервер
-    hot: true, // Включення hot reloading для оновлення сторінки без перезавантаження
-    open: true, // Автоматично відкриває браузер після запуску сервера
+        static: "./docs", // Вказуємо папку куди Webpack збирає файли
+        port: 5555, // Порт, на якому буде працювати сервер
+        hot: true, // Включення hot reloading для оновлення сторінки без перезавантаження
+        open: true, // Автоматично відкриває браузер після запуску сервера
     },
     module: {
-    rules: [
-        {
-        test: /\.js$/, // Правило для обробки всіх JS файлів
-        exclude: /node_modules/, // Виключаємо з обробки папку node_modules
-        use: {
-            loader: "babel-loader", // Babel для трансформації JS
-            options: {
-                presets: [
-                    [
-                      "@babel/preset-env", // Пресет для трансформації сучасного JS
-                      {
-                        targets: "> 0.5%, last 2 versions, IE 11", // Додаємо підтримку IE 11
-                      },
-                    ], 
+        rules: [
+            {
+                test: /\.js$/, // Правило для обробки всіх JS файлів
+                exclude: /node_modules/, // Виключаємо з обробки папку node_modules
+                use: {
+                    loader: "babel-loader", // Babel для трансформації JS
+                    options: {
+                        presets: [
+                            [
+                                "@babel/preset-env", // Пресет для трансформації сучасного JS
+                                {
+                                    targets: "> 0.5%, last 2 versions, IE 11", // Додаємо підтримку IE 11
+                                },
+                            ], 
+                        ],
+                    },
+                },
+            },
+            {
+                test: /\.css$/, // Правило для обробки всіх CSS файлів
+                use: [MiniCssExtractPlugin.loader, "css-loader"], // плагіни для витягування та обробки CSS
+            },
+            {
+                test: /\.scss$/, // Додаємо правило для обробки SCSS файлів
+                use: [
+                    MiniCssExtractPlugin.loader, // Витягуємо CSS в окремий файл
+                    "css-loader", // Завантажуємо CSS
+                    "sass-loader", // Компілюємо SCSS в CSS
                 ],
             },
-        },
-        },
-        {
-        test: /\.css$/, // Правило для обробки всіх CSS файлів
-        use: [MiniCssExtractPlugin.loader, "css-loader"], // плагіни для витягування та обробки CSS
-        },
-        {
-            test: /\.scss$/, // Додаємо правило для обробки SCSS файлів
-            use: [
-                MiniCssExtractPlugin.loader, // Витягуємо CSS в окремий файл
-                "css-loader", // Завантажуємо CSS
-                "sass-loader", // Компілюємо SCSS в CSS
-            ],
-        },
-        {
-        test: /\.(png|jpe?g|gif|svg)$/i, // Правило для обробки зображень (png, jpg, jpeg, gif, svg)
-        type: "asset", // Webpack автоматично перетворює зображення на модулі, це дає змогу для автоматичного хешування, оптимізація, і можливість інтеграції з іншими частинами коду/проекту
-        },
-    ],
+            {
+                test: /\.(png|jpe?g|gif|svg)$/i, // Правило для обробки зображень (png, jpg, jpeg, gif, svg)
+                type: "asset", // Webpack автоматично перетворює зображення на модулі, це дає змогу для автоматичного хешування, оптимізація, і можливість інтеграції з іншими частинами коду/проекту
+            },
+        ],
     },
     plugins: [
-    new HtmlWebpackPlugin({
-        template: "./src/index.html", // Вказуємо шаблон для HTML-файлу
-        filename: "index.html", // Вказуємо ім’я файлу, який буде створено
-    }),
-    new MiniCssExtractPlugin({
-        filename: "styles.css", // Генерація окремого CSS файлу з усіма стилями
-    }),
-    ],
-    optimization: {
-    minimizer: [
-        new TerserPlugin({
-        extractComments: false, // Вимикає генерацію LICENSE.txt при мінімізації JS
-        }), // Плагін для мінімізації JS
-        new CssMinimizerPlugin(), // Плагін для мінімізації CSS
-        new ImageMinimizerPlugin({
-        minimizer: {
-            implementation: ImageMinimizerPlugin.imageminGenerate, // Використовуємо бібліотеку imagemin для оптимізації зображень
-            options: {
-            plugins: ["gifsicle", "jpegtran", "optipng", "svgo"], // Плагіни для зменшення розміру зображень
-            },
-        },
+        new HtmlWebpackPlugin({
+            template: "./src/index.html", // Вказуємо шаблон для HTML-файлу
+            filename: "index.html", // Вказуємо ім’я файлу, який буде створено
+        }),
+        new MiniCssExtractPlugin({
+            filename: "styles.css", // Генерація окремого CSS файлу з усіма стилями
         }),
     ],
+    optimization: {
+        minimizer: [
+            new TerserPlugin({ // Плагін для мінімізації JS
+                extractComments: false, // Вимикає генерацію LICENSE.txt при мінімізації JS
+            }), 
+            new CssMinimizerPlugin(), // Плагін для мінімізації CSS
+            new ImageMinimizerPlugin({
+                minimizer: {
+                    implementation: ImageMinimizerPlugin.imageminGenerate, // Використовуємо бібліотеку imagemin для оптимізації зображень
+                    options: {
+                    plugins: ["gifsicle", "jpegtran", "optipng", "svgo"], // Плагіни для зменшення розміру зображень
+                    },
+                },
+            }),
+        ],
     },
 };
